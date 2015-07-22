@@ -49,13 +49,13 @@ class Fluent::InfluxdbOutput < Fluent::BufferedOutput
     chunk.msgpack_each do |tag, time, record|
       unless record.empty?
         record[:time] = time unless record.has_key?('time')
-        points[tag] ||= []
-        points[tag] << record
+        points[tag] ||= {}
+        points[tag].merge!(record)
       end
     end
 
     points.each { |tag, records|
-      @influxdb.write_point(tag, records)
+      @influxdb.write_point(tag, {values: records})
     }
   end
 end
